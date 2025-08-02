@@ -8,10 +8,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS configuration for production
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:3000', 'http://localhost:8080', 'https://game.web-designs.store'];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-app-name.netlify.app', 'https://your-app-name.onrender.com']
-    : ['http://localhost:3000', 'http://localhost:8080'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 };
 
@@ -52,4 +63,5 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
+  console.log('Allowed origins:', allowedOrigins);
 });

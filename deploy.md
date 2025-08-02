@@ -36,6 +36,7 @@
    ```
    NODE_ENV = production
    PORT = 3000
+   ALLOWED_ORIGINS = https://your-netlify-app-name.netlify.app
    ```
 
 5. **Deploy**
@@ -67,22 +68,34 @@
 
 ## 🔄 Post-Deployment Configuration
 
-### Update Backend URL in Client
-1. Open `client/index.html`
-2. Find the `getServerUrl()` function
-3. Replace the placeholder URL with your Render service URL:
+### Option 1: Environment Variables (Recommended)
+
+1. **Update Render Environment Variables:**
+   - Go to your Render service dashboard
+   - Add environment variable:
+     ```
+     ALLOWED_ORIGINS = https://your-actual-netlify-app.netlify.app
+     ```
+
+2. **Update Client Backend URL:**
+   - Edit `client/index.html`
+   - Replace the placeholder URL with your Render service URL:
+     ```javascript
+     return "https://your-actual-render-service.onrender.com";
+     ```
+
+### Option 2: Manual File Updates
+
+1. **Update Backend URL in Client:**
    ```javascript
-   return "https://your-actual-service-name.onrender.com";
+   // In client/index.html, find getServerUrl() function
+   return "https://your-actual-render-service.onrender.com";
    ```
 
-### Update CORS Origins in Server
-1. Open `server/server.js`
-2. Find the `corsOptions` object
-3. Replace the placeholder URLs with your actual Netlify domain:
+2. **Update CORS Origins in Server:**
    ```javascript
-   origin: process.env.NODE_ENV === 'production' 
-     ? ['https://your-actual-app-name.netlify.app']
-     : ['http://localhost:3000', 'http://localhost:8080']
+   // In server/server.js, update ALLOWED_ORIGINS environment variable
+   ALLOWED_ORIGINS = https://your-actual-netlify-app.netlify.app
    ```
 
 ### Redeploy After Changes
@@ -107,7 +120,7 @@
 ## 🚨 Troubleshooting
 
 ### Common Issues:
-- **CORS Errors**: Update CORS origins in server
+- **CORS Errors**: Update ALLOWED_ORIGINS environment variable in Render
 - **Connection Failed**: Check backend URL in client
 - **Build Failures**: Check package.json dependencies
 - **Port Issues**: Verify PORT environment variable
@@ -116,4 +129,17 @@
 1. Check Render logs for backend errors
 2. Check Netlify logs for build errors
 3. Test locally first
-4. Verify all environment variables are set 
+4. Verify all environment variables are set
+
+## 📝 Quick Reference
+
+### Your URLs:
+- **Netlify**: `https://your-app-name.netlify.app`
+- **Render**: `https://your-service-name.onrender.com`
+
+### Environment Variables for Render:
+```
+NODE_ENV = production
+PORT = 3000
+ALLOWED_ORIGINS = https://your-app-name.netlify.app
+``` 

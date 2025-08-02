@@ -42,7 +42,7 @@ A real-time multiplayer game platform with multiple games including Tic Tac Toe,
 1. Update the backend URL in `client/index.html`:
    ```javascript
    // Replace with your actual Render service URL
-   return "https://your-backend-service-name.onrender.com";
+   return "https://multiplayer-game-52kg.onrender.com";
    ```
 2. Update CORS origins in `server/server.js`:
    ```javascript

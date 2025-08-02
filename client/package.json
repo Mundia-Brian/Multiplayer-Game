@@ -4,7 +4,6 @@
   "description": "Frontend for multiplayer game hub",
   "main": "index.html",
   "scripts": {
-    "build": "echo 'Build completed'",
     "start": "npx serve . -p 3000"
   },
   "keywords": ["game", "multiplayer", "netlify"],
