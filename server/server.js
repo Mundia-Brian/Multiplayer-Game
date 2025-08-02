@@ -64,8 +64,8 @@ app.post('/login', (req, res) => {
   return res.json({ success: true, username });
 });
 
-// Handle 404 errors
-app.use('*', (req, res) => {
+// Handle 404 errors - use Express's built-in handler
+app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     availableRoutes: ['/', '/health', '/login'],
