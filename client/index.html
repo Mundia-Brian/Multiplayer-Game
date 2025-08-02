@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multiplayer Game Hub</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <script>
+    
+const socket = io(
+  window.location.hostname.includes("netlify")
+    ? "https://your-backend-service-name.onrender.com"
+    : "http://localhost:3000"
+);
+
+    socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+  </script>
+  <script>
+    
+function showLogin() {
+  document.body.innerHTML = \`
+    <h2>Login</h2>
+    <input id="username" placeholder="Username"><br>
+    <button onclick="login()">Login</button>
+  \`;
+}
+
+function login() {
+  const username = document.getElementById('username').value;
+  if (!username) return alert("Please enter a username");
+  localStorage.setItem("username", username);
+  initGameHub();
+}
+
+function initGameHub() {
+  const username = localStorage.getItem("username");
+  document.body.innerHTML = `<h1>Welcome, ${username}!</h1>`;
+  ${more_games_js}
+}
+
+if (!localStorage.getItem("username")) {
+  showLogin();
+} else {
+  initGameHub();
+}
+
+  </script>
+<div id="hangman-game">
+  <h2>Hangman (Coming Soon)</h2>
+  <p>Guess the hidden word letter by letter.</p>
+</div>
+<div id="snake-game">
+  <h2>Snake (Coming Soon)</h2>
+  <p>Control the snake to eat and grow. Avoid the walls!</p>
+</div>
+<div id="checkers-game">
+  <h2>Checkers (Coming Soon)</h2>
+  <p>Multiplayer checkers board under development.</p>
+</div>
+</body>
+</html>
