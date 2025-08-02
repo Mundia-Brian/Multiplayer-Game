@@ -1,8 +1,14 @@
-
 [build]
   command = "npm run build"
-  publish = "client/dist"
-  node_version = "18"
+  publish = "dist"
 
-[functions]
-  node_bundler = "esbuild"
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  NETLIFY_USE_NODE_VERSION = "18"
+
+[context.production.environment]
+  NODE_VERSION = "18"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "18"
