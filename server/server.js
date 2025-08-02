@@ -29,7 +29,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Add a root route to show server is running
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Multiplayer Game Server is running!',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      login: 'POST /login',
+      socket: 'WebSocket connection available'
+    }
+  });
+});
+
 const users = {}; // In-memory user storage
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // REST endpoint for user login
 app.post('/login', (req, res) => {
@@ -37,6 +62,15 @@ app.post('/login', (req, res) => {
   if (!username) return res.status(400).json({ error: "Username is required" });
   users[username] = { username, score: 0 };
   return res.json({ success: true, username });
+});
+
+// Handle 404 errors
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    availableRoutes: ['/', '/health', '/login'],
+    message: 'This is the backend API server. Frontend should be accessed via Netlify.'
+  });
 });
 
 const server = http.createServer(app);

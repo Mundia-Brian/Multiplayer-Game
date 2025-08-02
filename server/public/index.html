@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Game Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .online { background-color: #d4edda; color: #155724; }
+        .offline { background-color: #f8d7da; color: #721c24; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Multiplayer Game Server</h1>
+        <div id="status" class="status online">🟢 Server Online</div>
+        
+        <h2>Server Information</h2>
+        <p><strong>Backend URL:</strong> <span id="backend-url"></span></p>
+        <p><strong>Frontend URL:</strong> <a href="https://game.web-designs.store" target="_blank">https://game.web-designs.store</a></p>
+        
+        <h2>API Endpoints</h2>
+        <ul>
+            <li><code>GET /</code> - Server info</li>
+            <li><code>GET /health</code> - Health check</li>
+            <li><code>POST /login</code> - User login</li>
+            <li><code>WebSocket</code> - Real-time game connections</li>
+        </ul>
+        
+        <h2>Test Connections</h2>
+        <button onclick="testHealth()">Test Health Check</button>
+        <button onclick="testLogin()">Test Login API</button>
+        <button onclick="testSocket()">Test Socket Connection</button>
+        
+        <div id="results"></div>
+        
+        <h2>Next Steps</h2>
+        <p>✅ Backend server is running</p>
+        <p>🌐 Frontend is deployed on Netlify</p>
+        <p>🔗 Test the full application at: <a href="https://game.web-designs.store" target="_blank">https://game.web-designs.store</a></p>
+    </div>
+
+    <script>
+        // Display current URL
+        document.getElementById('backend-url').textContent = window.location.origin;
+        
+        async function testHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <div class="status online">
+                        ✅ Health Check: ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `
+                    <div class="status offline">
+                        ❌ Health Check Failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'testuser' })
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <div class="status online">
+                        ✅ Login Test: ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `
+                    <div class="status offline">
+                        ❌ Login Test Failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function testSocket() {
+            const socket = io();
+            socket.on('connect', () => {
+                document.getElementById('results').innerHTML = `
+                    <div class="status online">
+                        ✅ Socket Connected: ${socket.id}
+                    </div>
+                `;
+                socket.disconnect();
+            });
+            socket.on('connect_error', (error) => {
+                document.getElementById('results').innerHTML = `
+                    <div class="status offline">
+                        ❌ Socket Connection Failed: ${error.message}
+                    </div>
+                `;
+            });
+        }
+    </script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</body>
+</html> 

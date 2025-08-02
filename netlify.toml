@@ -1,16 +1,9 @@
 [build]
-  publish = "client"
-  command = "echo 'Build completed'"
-
-[build.environment]
-  NODE_VERSION = "18"
+  base = "client"
+  publish = "."
+  command = ""
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
-
-[dev]
-  command = "npm start"
-  port = 3000
-  publish = "client" 
+  status = 200 
