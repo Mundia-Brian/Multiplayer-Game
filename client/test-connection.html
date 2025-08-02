@@ -72,9 +72,13 @@
             statusEl.className = 'pending';
             
             const socket = io(BACKEND_URL, {
-                transports: ['websocket', 'polling'],
+                transports: ['polling', 'websocket'],
                 timeout: 20000,
-                forceNew: true
+                forceNew: true,
+                withCredentials: true,
+                extraHeaders: {
+                    'Access-Control-Allow-Origin': '*'
+                }
             });
             
             socket.on('connect', () => {
@@ -117,9 +121,19 @@
             try {
                 const response = await fetch(`${BACKEND_URL}/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'include',
                     body: JSON.stringify({ username: 'testuser' })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 document.getElementById('api-results').innerHTML = `
                     <div class="success">

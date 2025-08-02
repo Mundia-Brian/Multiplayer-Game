@@ -17,13 +17,18 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // For debugging, allow all origins temporarily
+    if (process.env.NODE_ENV === 'development' || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
+      console.log('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 };
 
 app.use(cors(corsOptions));
@@ -58,9 +63,13 @@ app.get('/health', (req, res) => {
 
 // REST endpoint for user login
 app.post('/login', (req, res) => {
+  console.log('Login request received:', req.body);
+  console.log('Headers:', req.headers);
+  
   const { username } = req.body;
   if (!username) return res.status(400).json({ error: "Username is required" });
   users[username] = { username, score: 0 };
+  console.log('User logged in:', username);
   return res.json({ success: true, username });
 });
 
