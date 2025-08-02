@@ -52,10 +52,9 @@
     };
 
     const socket = io(getServerUrl(), {
-      transports: ['polling', 'websocket'],
+      transports: ['polling'],
       timeout: 20000,
-      forceNew: true,
-      withCredentials: true
+      forceNew: true
     });
 
     socket.on("connect", () => {

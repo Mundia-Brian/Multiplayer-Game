@@ -72,13 +72,9 @@
             statusEl.className = 'pending';
             
             const socket = io(BACKEND_URL, {
-                transports: ['polling', 'websocket'],
+                transports: ['polling'],
                 timeout: 20000,
-                forceNew: true,
-                withCredentials: true,
-                extraHeaders: {
-                    'Access-Control-Allow-Origin': '*'
-                }
+                forceNew: true
             });
             
             socket.on('connect', () => {

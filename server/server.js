@@ -84,7 +84,13 @@ app.use((req, res) => {
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: corsOptions
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 // Game namespaces
@@ -93,15 +99,31 @@ const games = ['tic-tac-toe', 'trivia', 'drawing', 'card', 'dice'];
 games.forEach(game => {
   const namespace = io.of(`/${game}`);
   namespace.on('connection', (socket) => {
-    console.log(`[${game}] user connected: ${socket.id}`);
+    console.log(`✅ [${game}] user connected: ${socket.id}`);
+    console.log(`Transport: ${socket.conn.transport.name}`);
+    
     socket.on('play', (data) => {
+      console.log(`🎮 [${game}] play event:`, data);
       socket.broadcast.emit('play', data);
+    });
+    
+    socket.on('disconnect', (reason) => {
+      console.log(`❌ [${game}] disconnected: ${socket.id}, Reason: ${reason}`);
     });
   });
 });
 
 io.on('connection', (socket) => {
-  console.log('general connection established');
+  console.log('✅ General connection established:', socket.id);
+  console.log('Transport:', socket.conn.transport.name);
+  
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Disconnected:', socket.id, 'Reason:', reason);
+  });
+  
+  socket.on('error', (error) => {
+    console.log('❌ Socket error:', socket.id, error);
+  });
 });
 
 server.listen(PORT, () => {

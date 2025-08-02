@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .connecting { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        #log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔌 Socket.IO Test</h1>
+    
+    <div class="status connecting" id="status">Connecting...</div>
+    
+    <div>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+        <button onclick="testEmit()">Test Emit</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <h3>Connection Info:</h3>
+    <div id="info"></div>
+    
+    <h3>Log:</h3>
+    <div id="log"></div>
+
+    <script>
+        let socket = null;
+        
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `[${timestamp}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+        
+        function updateInfo() {
+            const infoEl = document.getElementById('info');
+            if (socket) {
+                infoEl.innerHTML = `
+                    <p><strong>Connected:</strong> ${socket.connected}</p>
+                    <p><strong>ID:</strong> ${socket.id || 'N/A'}</p>
+                    <p><strong>Transport:</strong> ${socket.io.engine.transport.name}</p>
+                    <p><strong>URL:</strong> ${window.location.origin}</p>
+                `;
+            } else {
+                infoEl.innerHTML = '<p>Not connected</p>';
+            }
+        }
+        
+        function connect() {
+            log('Attempting to connect...');
+            updateStatus('Connecting...', 'connecting');
+            
+            socket = io({
+                transports: ['polling'],
+                timeout: 20000,
+                forceNew: true
+            });
+            
+            socket.on('connect', () => {
+                log('✅ Connected!');
+                updateStatus('Connected', 'connected');
+                updateInfo();
+            });
+            
+            socket.on('disconnect', (reason) => {
+                log(`❌ Disconnected: ${reason}`);
+                updateStatus('Disconnected', 'disconnected');
+                updateInfo();
+            });
+            
+            socket.on('connect_error', (error) => {
+                log(`❌ Connection error: ${error.message}`);
+                updateStatus('Connection Failed', 'disconnected');
+                updateInfo();
+            });
+            
+            socket.on('error', (error) => {
+                log(`❌ Socket error: ${error}`);
+            });
+        }
+        
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                log('🔌 Manually disconnected');
+                updateStatus('Disconnected', 'disconnected');
+                updateInfo();
+            }
+        }
+        
+        function testEmit() {
+            if (socket && socket.connected) {
+                log('📤 Emitting test event...');
+                socket.emit('test', { message: 'Hello from client!' });
+            } else {
+                log('❌ Not connected, cannot emit');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Auto-connect on load
+        window.onload = function() {
+            connect();
+        };
+    </script>
+</body>
+</html> 
