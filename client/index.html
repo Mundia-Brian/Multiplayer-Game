@@ -1,43 +1,270 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Multiplayer Game Hub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 Multiplayer Game Hub</title>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      background-color: #f5f5f5;
     }
-    .game-container {
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .card {
       background: white;
-      padding: 20px;
-      margin: 10px 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 30px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
     }
-    button {
-      background: #007bff;
+
+    .login-form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-success {
+      background: #28a745;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      color: white;
+    }
+
+    .user-info h2 {
+      margin: 0;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #28a745;
+    }
+
+    .status-indicator.disconnected {
+      background: #dc3545;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
       cursor: pointer;
     }
-    button:hover {
-      background: #0056b3;
+
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
-    input {
-      padding: 8px;
-      margin: 5px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+
+    .game-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      color: #667eea;
     }
-    
-    /* Game-specific styles */
+
+    .game-title {
+      font-size: 1.5em;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .game-description {
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .game-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      color: #888;
+    }
+
+    .active-rooms {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .room-list {
+      display: grid;
+      gap: 15px;
+    }
+
+    .room-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .room-info h4 {
+      margin: 0;
+      color: #333;
+    }
+
+    .room-info p {
+      margin: 5px 0 0 0;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .invite-section {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .invite-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .invite-form input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .game-interface {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      min-height: 500px;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
     .game-board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -45,106 +272,415 @@
       max-width: 300px;
       margin: 20px auto;
     }
-    
+
     .cell {
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       border: 2px solid #333;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2em;
+      font-size: 2.5em;
       font-weight: bold;
       cursor: pointer;
       background: #f8f9fa;
+      transition: background 0.2s;
     }
-    
+
     .cell:hover {
       background: #e9ecef;
     }
-    
-    .trivia-options {
-      display: flex;
-      flex-direction: column;
+
+    .cell.x {
+      color: #dc3545;
+    }
+
+    .cell.o {
+      color: #007bff;
+    }
+
+    .trivia-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .question {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: grid;
       gap: 10px;
-      margin: 20px 0;
     }
-    
-    .trivia-options button {
-      padding: 15px;
+
+    .option {
+      padding: 15px 20px;
+      background: white;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
       text-align: left;
-      font-size: 1.1em;
     }
-    
+
+    .option:hover {
+      border-color: #667eea;
+      background: #f8f9fa;
+    }
+
+    .option.selected {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    .drawing-container {
+      text-align: center;
+    }
+
     #drawing-canvas {
-      display: block;
+      border: 2px solid #333;
+      border-radius: 10px;
       margin: 20px auto;
       cursor: crosshair;
     }
-    
+
     .drawing-controls {
       display: flex;
-      gap: 10px;
+      gap: 15px;
       align-items: center;
       justify-content: center;
-      margin: 10px 0;
-    }
-    
-    .hand {
-      display: flex;
-      gap: 10px;
       margin: 20px 0;
-      justify-content: center;
+      flex-wrap: wrap;
     }
-    
-    .card {
-      width: 60px;
-      height: 80px;
-      border: 2px solid #333;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      font-weight: bold;
-      cursor: pointer;
+
+    .dice-container {
+      text-align: center;
     }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    .game-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    
+
     .dice {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border: 3px solid #333;
-      border-radius: 10px;
+      border-radius: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2em;
+      font-size: 3em;
       font-weight: bold;
       background: white;
       margin: 20px auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
-    
-    .dice-game {
+
+    .chat-container {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .chat-messages {
+      height: 200px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #e9ecef;
+    }
+
+    .message.own {
+      background: #667eea;
+      color: white;
+      margin-left: 20%;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
       text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .games-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .user-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .invite-form {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div id="login-screen">
+      <div class="header">
+        <h1><i class="fas fa-gamepad"></i> Multiplayer Game Hub</h1>
+        <p>Connect, Play, and Have Fun with Friends!</p>
+      </div>
+      
+      <div class="card login-form">
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
+          <i class="fas fa-sign-in-alt"></i> Welcome Back
+        </h2>
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        
+        <div class="form-group">
+          <label for="avatar">Avatar (Optional)</label>
+          <input type="text" id="avatar" placeholder="Enter avatar URL or emoji">
+        </div>
+        
+        <button class="btn" onclick="login()" style="width: 100%;">
+          <i class="fas fa-play"></i> Start Playing
+        </button>
+      </div>
+    </div>
+
+    <div id="game-hub" class="hidden">
+      <div class="header">
+        <h1><i class="fas fa-gamepad"></i> Game Hub</h1>
+        <p>Choose your game and invite friends!</p>
+      </div>
+
+      <div class="user-info">
+        <div>
+          <h2><i class="fas fa-user"></i> Welcome, <span id="user-display"></span></h2>
+          <p>Ready to play some awesome games!</p>
+        </div>
+        <div class="connection-status">
+          <div class="status-indicator" id="connection-indicator"></div>
+          <span id="connection-text">Connected</span>
+        </div>
+      </div>
+
+      <div class="invite-section">
+        <h3><i class="fas fa-share"></i> Invite Friends</h3>
+        <p>Share this link with friends to join your game session:</p>
+        <div class="invite-form">
+          <input type="text" id="invite-link" readonly value="https://game.web-designs.store">
+          <button class="btn" onclick="copyInviteLink()">
+            <i class="fas fa-copy"></i> Copy Link
+          </button>
+        </div>
+      </div>
+
+      <div class="active-rooms">
+        <h3><i class="fas fa-users"></i> Active Game Rooms</h3>
+        <div class="room-list" id="room-list">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading active rooms...
+          </div>
+        </div>
+      </div>
+
+      <div class="games-grid">
+        <div class="game-card" onclick="joinGame('tic-tac-toe')">
+          <div class="game-icon">🎮</div>
+          <div class="game-title">Tic Tac Toe</div>
+          <div class="game-description">Classic X's and O's game. Play against friends in real-time!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 2 Players</span>
+            <span><i class="fas fa-clock"></i> 5 min</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+
+        <div class="game-card" onclick="joinGame('trivia')">
+          <div class="game-icon">🎲</div>
+          <div class="game-title">Trivia Challenge</div>
+          <div class="game-description">Test your knowledge with friends. Answer questions and compete for points!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 2-8 Players</span>
+            <span><i class="fas fa-clock"></i> 10 min</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+
+        <div class="game-card" onclick="joinGame('drawing')">
+          <div class="game-icon">🎨</div>
+          <div class="game-title">Collaborative Drawing</div>
+          <div class="game-description">Draw together with friends in real-time. Create amazing artwork!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 2-10 Players</span>
+            <span><i class="fas fa-clock"></i> Unlimited</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+
+        <div class="game-card" onclick="joinGame('dice')">
+          <div class="game-icon">🎯</div>
+          <div class="game-title">Dice Battle</div>
+          <div class="game-description">Roll the dice and compete with friends. Highest score wins!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 2-6 Players</span>
+            <span><i class="fas fa-clock"></i> 3 min</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+
+        <div class="game-card" onclick="joinGame('word-guess')">
+          <div class="game-icon">📝</div>
+          <div class="game-title">Word Guessing</div>
+          <div class="game-description">One player draws, others guess the word. Fun for everyone!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 3-8 Players</span>
+            <span><i class="fas fa-clock"></i> 2 min</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+
+        <div class="game-card" onclick="joinGame('rock-paper-scissors')">
+          <div class="game-icon">✂️</div>
+          <div class="game-title">Rock Paper Scissors</div>
+          <div class="game-description">Quick battles with friends. Best of 5 rounds!</div>
+          <div class="game-stats">
+            <span><i class="fas fa-users"></i> 2 Players</span>
+            <span><i class="fas fa-clock"></i> 1 min</span>
+          </div>
+          <button class="btn">Join Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-interface" class="hidden">
+      <div class="game-interface">
+        <div class="game-header">
+          <div>
+            <h2 id="game-title">Game Title</h2>
+            <p id="game-status">Waiting for players...</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary" onclick="leaveGame()">
+              <i class="fas fa-sign-out-alt"></i> Leave Game
+            </button>
+          </div>
+        </div>
+        
+        <div id="game-content">
+          <!-- Game content will be loaded here -->
+        </div>
+        
+        <div class="chat-container">
+          <h4><i class="fas fa-comments"></i> Game Chat</h4>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+            <button class="btn" onclick="sendMessage()">
+              <i class="fas fa-paper-plane"></i> Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Determine server URL based on environment
-    const getServerUrl = () => {
+    // Global variables
+    let currentUser = null;
+    let gameSocket = null;
+    let currentGame = null;
+    let gameState = {};
+    let players = [];
+
+    // Initialize connection
+    const socket = io(getServerUrl(), {
+      transports: ['polling'],
+      timeout: 20000,
+      forceNew: true
+    });
+
+    // Connection event handlers
+    socket.on("connect", () => {
+      console.log("✅ Connected to server:", socket.id);
+      updateConnectionStatus(true);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ Connection error:", error);
+      updateConnectionStatus(false);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔌 Disconnected from server");
+      updateConnectionStatus(false);
+    });
+
+    // Game event handlers
+    socket.on('gameState', (state) => {
+      gameState = state;
+      updateGameInterface();
+    });
+
+    socket.on('playerJoined', (player) => {
+      players.push(player);
+      updateGameInterface();
+      addChatMessage('system', `${player.username} joined the game`);
+    });
+
+    socket.on('playerLeft', (playerId) => {
+      players = players.filter(p => p.id !== playerId);
+      updateGameInterface();
+      addChatMessage('system', 'A player left the game');
+    });
+
+    socket.on('chatMessage', (message) => {
+      addChatMessage(message.username, message.text);
+    });
+
+    // Utility functions
+    function getServerUrl() {
       if (window.location.hostname.includes("netlify")) {
         return "https://multiplayer-game-52kg.onrender.com";
       } else if (window.location.hostname.includes("localhost")) {
@@ -152,105 +688,55 @@
       } else {
         return "https://multiplayer-game-52kg.onrender.com";
       }
-    };
+    }
 
-    const socket = io(getServerUrl(), {
-      transports: ['polling'],
-      timeout: 20000,
-      forceNew: true
-    });
-
-    socket.on("connect", () => {
-      console.log("✅ Connected to server:", socket.id);
-      // Update UI to show connection status
-      if (document.getElementById('connection-status')) {
-        document.getElementById('connection-status').textContent = '🟢 Connected';
+    function updateConnectionStatus(connected) {
+      const indicator = document.getElementById('connection-indicator');
+      const text = document.getElementById('connection-text');
+      
+      if (connected) {
+        indicator.classList.remove('disconnected');
+        text.textContent = 'Connected';
+      } else {
+        indicator.classList.add('disconnected');
+        text.textContent = 'Disconnected';
       }
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("❌ Connection error:", error);
-      // Update UI to show connection error
-      if (document.getElementById('connection-status')) {
-        document.getElementById('connection-status').textContent = '🔴 Connection Failed';
-      }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("🔌 Disconnected from server");
-      if (document.getElementById('connection-status')) {
-        document.getElementById('connection-status').textContent = '🟡 Disconnected';
-      }
-    });
-  </script>
-  <script>
-    function showLogin() {
-      document.body.innerHTML = `
-        <div class="game-container">
-          <h2>Login to Multiplayer Game Hub</h2>
-          <input id="username" placeholder="Enter your username"><br><br>
-          <button onclick="login()">Login</button>
-        </div>
-      `;
     }
 
     function login() {
-      const username = document.getElementById('username').value;
-      if (!username) return alert("Please enter a username");
-      localStorage.setItem("username", username);
-      initGameHub();
+      const username = document.getElementById('username').value.trim();
+      const avatar = document.getElementById('avatar').value.trim() || '👤';
+      
+      if (!username) {
+        alert('Please enter a username');
+        return;
+      }
+
+      currentUser = { username, avatar };
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('game-hub').classList.remove('hidden');
+      document.getElementById('user-display').textContent = username;
+      
+      // Load active rooms
+      loadActiveRooms();
     }
 
-    function initGameHub() {
-      const username = localStorage.getItem("username");
-      document.body.innerHTML = `
-        <div class="game-container">
-          <h1>Welcome, ${username}!</h1>
-          <p>Server Status: <span id="connection-status">🟡 Connecting...</span></p>
-          <p>Choose a game to play:</p>
-          <div id="games-list">
-            <div class="game-container">
-              <h3>🎮 Tic Tac Toe</h3>
-              <p>Classic X's and O's game</p>
-              <button onclick="joinGame('tic-tac-toe')">Join Game</button>
-            </div>
-            <div class="game-container">
-              <h3>🎲 Trivia</h3>
-              <p>Test your knowledge</p>
-              <button onclick="joinGame('trivia')">Join Game</button>
-            </div>
-            <div class="game-container">
-              <h3>🎨 Drawing</h3>
-              <p>Collaborative drawing game</p>
-              <button onclick="joinGame('drawing')">Join Game</button>
-            </div>
-            <div class="game-container">
-              <h3>🃏 Card Game</h3>
-              <p>Multiplayer card games</p>
-              <button onclick="joinGame('card')">Join Game</button>
-            </div>
-            <div class="game-container">
-              <h3>🎯 Dice Game</h3>
-              <p>Roll the dice!</p>
-              <button onclick="joinGame('dice')">Join Game</button>
-            </div>
-          </div>
-          <br>
-          <button onclick="logout()">Logout</button>
-        </div>
-      `;
+    function loadActiveRooms() {
+      socket.emit('getActiveRooms');
     }
 
     function joinGame(gameType) {
-      const username = localStorage.getItem("username");
-      console.log(`${username} joining ${gameType}`);
+      currentGame = gameType;
       
-      // Join the specific game namespace
-      const gameSocket = io(`${getServerUrl()}/${gameType}`);
+      // Join game namespace
+      gameSocket = io(`${getServerUrl()}/${gameType}`);
       
       gameSocket.on('connect', () => {
         console.log(`✅ Connected to ${gameType} game`);
-        showGameInterface(gameType, username, gameSocket);
+        showGameInterface(gameType);
+        gameSocket.emit('joinGame', { user: currentUser });
       });
       
       gameSocket.on('connect_error', (error) => {
@@ -259,144 +745,159 @@
       });
     }
 
-    function showGameInterface(gameType, username, gameSocket) {
-      let gameHTML = '';
+    function showGameInterface(gameType) {
+      document.getElementById('game-hub').classList.add('hidden');
+      document.getElementById('game-interface').classList.remove('hidden');
       
+      const gameTitle = document.getElementById('game-title');
+      const gameContent = document.getElementById('game-content');
+      
+      // Set game title
+      const gameNames = {
+        'tic-tac-toe': '🎮 Tic Tac Toe',
+        'trivia': '🎲 Trivia Challenge',
+        'drawing': '🎨 Collaborative Drawing',
+        'dice': '🎯 Dice Battle',
+        'word-guess': '📝 Word Guessing',
+        'rock-paper-scissors': '✂️ Rock Paper Scissors'
+      };
+      
+      gameTitle.textContent = gameNames[gameType] || gameType;
+      
+      // Load game-specific interface
+      loadGameInterface(gameType, gameContent);
+    }
+
+    function loadGameInterface(gameType, container) {
       switch(gameType) {
         case 'tic-tac-toe':
-          gameHTML = `
-            <div class="game-container">
-              <h2>🎮 Tic Tac Toe</h2>
-              <p>Player: ${username}</p>
-              <div class="game-board" id="tictactoe-board">
-                <div class="cell" onclick="makeMove(0, 0)"></div>
-                <div class="cell" onclick="makeMove(0, 1)"></div>
-                <div class="cell" onclick="makeMove(0, 2)"></div>
-                <div class="cell" onclick="makeMove(1, 0)"></div>
-                <div class="cell" onclick="makeMove(1, 1)"></div>
-                <div class="cell" onclick="makeMove(1, 2)"></div>
-                <div class="cell" onclick="makeMove(2, 0)"></div>
-                <div class="cell" onclick="makeMove(2, 1)"></div>
-                <div class="cell" onclick="makeMove(2, 2)"></div>
-              </div>
-              <button onclick="leaveGame()">Leave Game</button>
-            </div>
-          `;
+          loadTicTacToe(container);
           break;
-          
         case 'trivia':
-          gameHTML = `
-            <div class="game-container">
-              <h2>🎲 Trivia</h2>
-              <p>Player: ${username}</p>
-              <div id="trivia-question">
-                <h3>Question:</h3>
-                <p>What is the capital of France?</p>
-                <div class="trivia-options">
-                  <button onclick="answerTrivia('A')">A) London</button>
-                  <button onclick="answerTrivia('B')">B) Paris</button>
-                  <button onclick="answerTrivia('C')">C) Berlin</button>
-                  <button onclick="answerTrivia('D')">D) Madrid</button>
-                </div>
-              </div>
-              <button onclick="leaveGame()">Leave Game</button>
-            </div>
-          `;
+          loadTrivia(container);
           break;
-          
         case 'drawing':
-          gameHTML = `
-            <div class="game-container">
-              <h2>🎨 Drawing</h2>
-              <p>Player: ${username}</p>
-              <canvas id="drawing-canvas" width="400" height="300" style="border: 1px solid #ccc;"></canvas>
-              <div class="drawing-controls">
-                <button onclick="clearCanvas()">Clear</button>
-                <input type="color" id="color-picker" value="#000000">
-                <input type="range" id="brush-size" min="1" max="20" value="5">
-              </div>
-              <button onclick="leaveGame()">Leave Game</button>
-            </div>
-          `;
-          break;
-          
-        case 'card':
-          gameHTML = `
-            <div class="game-container">
-              <h2>🃏 Card Game</h2>
-              <p>Player: ${username}</p>
-              <div class="card-game">
-                <div class="hand" id="player-hand">
-                  <div class="card">A♠</div>
-                  <div class="card">K♥</div>
-                  <div class="card">Q♦</div>
-                </div>
-                <div class="game-actions">
-                  <button onclick="playCard()">Play Card</button>
-                  <button onclick="drawCard()">Draw Card</button>
-                </div>
-              </div>
-              <button onclick="leaveGame()">Leave Game</button>
-            </div>
-          `;
-          break;
-          
-        case 'dice':
-          gameHTML = `
-            <div class="game-container">
-              <h2>🎯 Dice Game</h2>
-              <p>Player: ${username}</p>
-              <div class="dice-game">
-                <div class="dice" id="dice-result">?</div>
-                <button onclick="rollDice()">Roll Dice</button>
-                <p>Score: <span id="dice-score">0</span></p>
-              </div>
-              <button onclick="leaveGame()">Leave Game</button>
-            </div>
-          `;
-          break;
-          
-        default:
-          gameHTML = `
-            <div class="game-container">
-              <h2>🎮 ${gameType}</h2>
-              <p>Game coming soon!</p>
-              <button onclick="leaveGame()">Back to Lobby</button>
-            </div>
-          `;
-      }
-      
-      document.body.innerHTML = gameHTML;
-      setupGameSpecificLogic(gameType, gameSocket);
-    }
-
-    function setupGameSpecificLogic(gameType, gameSocket) {
-      switch(gameType) {
-        case 'drawing':
-          setupDrawingCanvas(gameSocket);
+          loadDrawing(container);
           break;
         case 'dice':
-          setupDiceGame(gameSocket);
+          loadDice(container);
+          break;
+        case 'word-guess':
+          loadWordGuess(container);
+          break;
+        case 'rock-paper-scissors':
+          loadRockPaperScissors(container);
           break;
       }
     }
 
-    function leaveGame() {
-      initGameHub();
+    function loadTicTacToe(container) {
+      container.innerHTML = `
+        <div style="text-align: center;">
+          <div class="game-board" id="tictactoe-board">
+            <div class="cell" onclick="makeMove(0, 0)"></div>
+            <div class="cell" onclick="makeMove(0, 1)"></div>
+            <div class="cell" onclick="makeMove(0, 2)"></div>
+            <div class="cell" onclick="makeMove(1, 0)"></div>
+            <div class="cell" onclick="makeMove(1, 1)"></div>
+            <div class="cell" onclick="makeMove(1, 2)"></div>
+            <div class="cell" onclick="makeMove(2, 0)"></div>
+            <div class="cell" onclick="makeMove(2, 1)"></div>
+            <div class="cell" onclick="makeMove(2, 2)"></div>
+          </div>
+          <div style="margin-top: 20px;">
+            <p id="game-status">Waiting for opponent...</p>
+            <button class="btn btn-secondary" onclick="resetGame()">New Game</button>
+          </div>
+        </div>
+      `;
     }
 
-    // Game-specific functions
-    function makeMove(row, col) {
-      console.log(`Making move at ${row}, ${col}`);
-      // Tic-tac-toe logic would go here
+    function loadTrivia(container) {
+      container.innerHTML = `
+        <div class="trivia-container">
+          <div class="question">
+            <h3>Question 1 of 10</h3>
+            <p>What is the capital of France?</p>
+          </div>
+          <div class="options">
+            <div class="option" onclick="selectAnswer('A')">A) London</div>
+            <div class="option" onclick="selectAnswer('B')">B) Paris</div>
+            <div class="option" onclick="selectAnswer('C')">C) Berlin</div>
+            <div class="option" onclick="selectAnswer('D')">D) Madrid</div>
+          </div>
+          <div style="margin-top: 20px; text-align: center;">
+            <p>Time remaining: <span id="timer">30</span>s</p>
+            <p>Score: <span id="score">0</span></p>
+          </div>
+        </div>
+      `;
     }
 
-    function answerTrivia(answer) {
-      console.log(`Answered: ${answer}`);
-      // Trivia logic would go here
+    function loadDrawing(container) {
+      container.innerHTML = `
+        <div class="drawing-container">
+          <canvas id="drawing-canvas" width="600" height="400"></canvas>
+          <div class="drawing-controls">
+            <button class="btn btn-secondary" onclick="clearCanvas()">
+              <i class="fas fa-eraser"></i> Clear
+            </button>
+            <input type="color" id="color-picker" value="#000000">
+            <input type="range" id="brush-size" min="1" max="20" value="5">
+            <span id="brush-size-display">5px</span>
+          </div>
+        </div>
+      `;
+      setupDrawingCanvas();
     }
 
-    function setupDrawingCanvas(gameSocket) {
+    function loadDice(container) {
+      container.innerHTML = `
+        <div class="dice-container">
+          <div class="dice" id="dice-result">?</div>
+          <button class="btn" onclick="rollDice()">
+            <i class="fas fa-dice"></i> Roll Dice
+          </button>
+          <div style="margin-top: 20px;">
+            <p>Your Score: <span id="player-score">0</span></p>
+            <p>Opponent Score: <span id="opponent-score">0</span></p>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadWordGuess(container) {
+      container.innerHTML = `
+        <div style="text-align: center;">
+          <h3>Word Guessing</h3>
+          <p>One player draws, others guess!</p>
+          <div id="word-display" style="font-size: 2em; margin: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            _ _ _ _ _ _ _
+          </div>
+          <div id="guessing-interface" style="display: none;">
+            <input type="text" id="guess-input" placeholder="Type your guess..." style="margin: 10px;">
+            <button class="btn" onclick="submitGuess()">Submit Guess</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadRockPaperScissors(container) {
+      container.innerHTML = `
+        <div style="text-align: center;">
+          <h3>Rock Paper Scissors</h3>
+          <p>Choose your weapon!</p>
+          <div style="display: flex; justify-content: center; gap: 20px; margin: 30px;">
+            <button class="btn" onclick="makeChoice('rock')" style="font-size: 2em;">🪨</button>
+            <button class="btn" onclick="makeChoice('paper')" style="font-size: 2em;">📄</button>
+            <button class="btn" onclick="makeChoice('scissors')" style="font-size: 2em;">✂️</button>
+          </div>
+          <div id="rps-result" style="margin-top: 20px;"></div>
+        </div>
+      `;
+    }
+
+    function setupDrawingCanvas() {
       const canvas = document.getElementById('drawing-canvas');
       const ctx = canvas.getContext('2d');
       let isDrawing = false;
@@ -425,49 +926,152 @@
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(x, y);
+        
+        // Send drawing data to server
+        if (gameSocket) {
+          gameSocket.emit('draw', { x, y, color: ctx.strokeStyle, width: ctx.lineWidth });
+        }
       }
       
       function stopDrawing() {
         isDrawing = false;
         ctx.beginPath();
       }
+      
+      // Update brush size display
+      document.getElementById('brush-size').addEventListener('input', function() {
+        document.getElementById('brush-size-display').textContent = this.value + 'px';
+      });
     }
 
     function clearCanvas() {
       const canvas = document.getElementById('drawing-canvas');
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (gameSocket) {
+        gameSocket.emit('clearCanvas');
+      }
     }
 
-    function setupDiceGame(gameSocket) {
-      window.rollDice = function() {
-        const result = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-result').textContent = result;
-        const currentScore = parseInt(document.getElementById('dice-score').textContent);
-        document.getElementById('dice-score').textContent = currentScore + result;
-      };
+    function makeMove(row, col) {
+      if (gameSocket) {
+        gameSocket.emit('makeMove', { row, col });
+      }
     }
 
-    function playCard() {
-      console.log('Playing card');
-      // Card game logic would go here
+    function selectAnswer(answer) {
+      if (gameSocket) {
+        gameSocket.emit('selectAnswer', { answer });
+      }
     }
 
-    function drawCard() {
-      console.log('Drawing card');
-      // Card game logic would go here
+    function rollDice() {
+      const result = Math.floor(Math.random() * 6) + 1;
+      document.getElementById('dice-result').textContent = result;
+      
+      if (gameSocket) {
+        gameSocket.emit('rollDice', { result });
+      }
     }
 
-    function logout() {
-      localStorage.removeItem("username");
-      showLogin();
+    function makeChoice(choice) {
+      if (gameSocket) {
+        gameSocket.emit('makeChoice', { choice });
+      }
     }
 
-    if (!localStorage.getItem("username")) {
-      showLogin();
-    } else {
-      initGameHub();
+    function submitGuess() {
+      const guess = document.getElementById('guess-input').value;
+      if (gameSocket) {
+        gameSocket.emit('submitGuess', { guess });
+      }
     }
+
+    function leaveGame() {
+      if (gameSocket) {
+        gameSocket.disconnect();
+      }
+      
+      document.getElementById('game-interface').classList.add('hidden');
+      document.getElementById('game-hub').classList.remove('hidden');
+      
+      // Clear game state
+      currentGame = null;
+      gameState = {};
+      players = [];
+    }
+
+    function copyInviteLink() {
+      const inviteLink = document.getElementById('invite-link');
+      inviteLink.select();
+      document.execCommand('copy');
+      
+      // Show feedback
+      const btn = event.target;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+      }, 2000);
+    }
+
+    function addChatMessage(username, text) {
+      const chatMessages = document.getElementById('chat-messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${username === currentUser?.username ? 'own' : ''}`;
+      messageDiv.innerHTML = `<strong>${username}:</strong> ${text}`;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      
+      if (text && gameSocket) {
+        gameSocket.emit('chatMessage', { text });
+        input.value = '';
+      }
+    }
+
+    function handleChatKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function updateGameInterface() {
+      // Update game interface based on current game state
+      if (currentGame === 'tic-tac-toe') {
+        updateTicTacToeBoard();
+      }
+    }
+
+    function updateTicTacToeBoard() {
+      if (gameState.board) {
+        const cells = document.querySelectorAll('#tictactoe-board .cell');
+        gameState.board.forEach((row, rowIndex) => {
+          row.forEach((cell, colIndex) => {
+            const cellElement = cells[rowIndex * 3 + colIndex];
+            cellElement.textContent = cell || '';
+            cellElement.className = `cell ${cell || ''}`;
+          });
+        });
+      }
+    }
+
+    // Initialize app
+    window.onload = function() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('game-hub').classList.remove('hidden');
+        document.getElementById('user-display').textContent = currentUser.username;
+        loadActiveRooms();
+      }
+    };
   </script>
 </body>
 </html>
