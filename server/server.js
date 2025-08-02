@@ -5,7 +5,17 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 3000;
+
+// CORS configuration for production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-app-name.netlify.app', 'https://your-app-name.onrender.com']
+    : ['http://localhost:3000', 'http://localhost:8080'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const users = {}; // In-memory user storage
@@ -20,9 +30,7 @@ app.post('/login', (req, res) => {
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: '*'
-  }
+  cors: corsOptions
 });
 
 // Game namespaces
@@ -42,6 +50,6 @@ io.on('connection', (socket) => {
   console.log('general connection established');
 });
 
-server.listen(3000, () => {
-  console.log('Server listening on port 3000');
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });

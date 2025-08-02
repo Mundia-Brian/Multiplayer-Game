@@ -4,61 +4,137 @@
 <head>
   <title>Multiplayer Game Hub</title>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .game-container {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    input {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
   <script>
-    
-const socket = io(
-  window.location.hostname.includes("netlify")
-    ? "https://your-backend-service-name.onrender.com"
-    : "http://localhost:3000"
-);
+    // Determine server URL based on environment
+    const getServerUrl = () => {
+      if (window.location.hostname.includes("netlify")) {
+        return "https://your-backend-service-name.onrender.com";
+      } else if (window.location.hostname.includes("localhost")) {
+        return "http://localhost:3000";
+      } else {
+        return "https://your-backend-service-name.onrender.com";
+      }
+    };
+
+    const socket = io(getServerUrl());
 
     socket.on("connect", () => {
       console.log("Connected to server");
     });
+
+    socket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+    });
   </script>
   <script>
-    
-function showLogin() {
-  document.body.innerHTML = \`
-    <h2>Login</h2>
-    <input id="username" placeholder="Username"><br>
-    <button onclick="login()">Login</button>
-  \`;
-}
+    function showLogin() {
+      document.body.innerHTML = `
+        <div class="game-container">
+          <h2>Login to Multiplayer Game Hub</h2>
+          <input id="username" placeholder="Enter your username"><br><br>
+          <button onclick="login()">Login</button>
+        </div>
+      `;
+    }
 
-function login() {
-  const username = document.getElementById('username').value;
-  if (!username) return alert("Please enter a username");
-  localStorage.setItem("username", username);
-  initGameHub();
-}
+    function login() {
+      const username = document.getElementById('username').value;
+      if (!username) return alert("Please enter a username");
+      localStorage.setItem("username", username);
+      initGameHub();
+    }
 
-function initGameHub() {
-  const username = localStorage.getItem("username");
-  document.body.innerHTML = `<h1>Welcome, ${username}!</h1>`;
-  ${more_games_js}
-}
+    function initGameHub() {
+      const username = localStorage.getItem("username");
+      document.body.innerHTML = `
+        <div class="game-container">
+          <h1>Welcome, ${username}!</h1>
+          <p>Choose a game to play:</p>
+          <div id="games-list">
+            <div class="game-container">
+              <h3>🎮 Tic Tac Toe</h3>
+              <p>Classic X's and O's game</p>
+              <button onclick="joinGame('tic-tac-toe')">Join Game</button>
+            </div>
+            <div class="game-container">
+              <h3>🎲 Trivia</h3>
+              <p>Test your knowledge</p>
+              <button onclick="joinGame('trivia')">Join Game</button>
+            </div>
+            <div class="game-container">
+              <h3>🎨 Drawing</h3>
+              <p>Collaborative drawing game</p>
+              <button onclick="joinGame('drawing')">Join Game</button>
+            </div>
+            <div class="game-container">
+              <h3>🃏 Card Game</h3>
+              <p>Multiplayer card games</p>
+              <button onclick="joinGame('card')">Join Game</button>
+            </div>
+            <div class="game-container">
+              <h3>🎯 Dice Game</h3>
+              <p>Roll the dice!</p>
+              <button onclick="joinGame('dice')">Join Game</button>
+            </div>
+          </div>
+          <br>
+          <button onclick="logout()">Logout</button>
+        </div>
+      `;
+    }
 
-if (!localStorage.getItem("username")) {
-  showLogin();
-} else {
-  initGameHub();
-}
+    function joinGame(gameType) {
+      const username = localStorage.getItem("username");
+      console.log(`${username} joining ${gameType}`);
+      // Game logic will be implemented here
+      alert(`Joining ${gameType} game...`);
+    }
 
+    function logout() {
+      localStorage.removeItem("username");
+      showLogin();
+    }
+
+    if (!localStorage.getItem("username")) {
+      showLogin();
+    } else {
+      initGameHub();
+    }
   </script>
-<div id="hangman-game">
-  <h2>Hangman (Coming Soon)</h2>
-  <p>Guess the hidden word letter by letter.</p>
-</div>
-<div id="snake-game">
-  <h2>Snake (Coming Soon)</h2>
-  <p>Control the snake to eat and grow. Avoid the walls!</p>
-</div>
-<div id="checkers-game">
-  <h2>Checkers (Coming Soon)</h2>
-  <p>Multiplayer checkers board under development.</p>
-</div>
 </body>
 </html>
