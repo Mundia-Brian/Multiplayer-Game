@@ -36,6 +36,109 @@
       border: 1px solid #ddd;
       border-radius: 4px;
     }
+    
+    /* Game-specific styles */
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      max-width: 300px;
+      margin: 20px auto;
+    }
+    
+    .cell {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      cursor: pointer;
+      background: #f8f9fa;
+    }
+    
+    .cell:hover {
+      background: #e9ecef;
+    }
+    
+    .trivia-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .trivia-options button {
+      padding: 15px;
+      text-align: left;
+      font-size: 1.1em;
+    }
+    
+    #drawing-canvas {
+      display: block;
+      margin: 20px auto;
+      cursor: crosshair;
+    }
+    
+    .drawing-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    
+    .hand {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
+    }
+    
+    .card {
+      width: 60px;
+      height: 80px;
+      border: 2px solid #333;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .game-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .dice {
+      width: 80px;
+      height: 80px;
+      border: 3px solid #333;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      background: white;
+      margin: 20px auto;
+    }
+    
+    .dice-game {
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -141,8 +244,218 @@
     function joinGame(gameType) {
       const username = localStorage.getItem("username");
       console.log(`${username} joining ${gameType}`);
-      // Game logic will be implemented here
-      alert(`Joining ${gameType} game...`);
+      
+      // Join the specific game namespace
+      const gameSocket = io(`${getServerUrl()}/${gameType}`);
+      
+      gameSocket.on('connect', () => {
+        console.log(`✅ Connected to ${gameType} game`);
+        showGameInterface(gameType, username, gameSocket);
+      });
+      
+      gameSocket.on('connect_error', (error) => {
+        console.error(`❌ Failed to join ${gameType}:`, error);
+        alert(`Failed to join ${gameType} game. Please try again.`);
+      });
+    }
+
+    function showGameInterface(gameType, username, gameSocket) {
+      let gameHTML = '';
+      
+      switch(gameType) {
+        case 'tic-tac-toe':
+          gameHTML = `
+            <div class="game-container">
+              <h2>🎮 Tic Tac Toe</h2>
+              <p>Player: ${username}</p>
+              <div class="game-board" id="tictactoe-board">
+                <div class="cell" onclick="makeMove(0, 0)"></div>
+                <div class="cell" onclick="makeMove(0, 1)"></div>
+                <div class="cell" onclick="makeMove(0, 2)"></div>
+                <div class="cell" onclick="makeMove(1, 0)"></div>
+                <div class="cell" onclick="makeMove(1, 1)"></div>
+                <div class="cell" onclick="makeMove(1, 2)"></div>
+                <div class="cell" onclick="makeMove(2, 0)"></div>
+                <div class="cell" onclick="makeMove(2, 1)"></div>
+                <div class="cell" onclick="makeMove(2, 2)"></div>
+              </div>
+              <button onclick="leaveGame()">Leave Game</button>
+            </div>
+          `;
+          break;
+          
+        case 'trivia':
+          gameHTML = `
+            <div class="game-container">
+              <h2>🎲 Trivia</h2>
+              <p>Player: ${username}</p>
+              <div id="trivia-question">
+                <h3>Question:</h3>
+                <p>What is the capital of France?</p>
+                <div class="trivia-options">
+                  <button onclick="answerTrivia('A')">A) London</button>
+                  <button onclick="answerTrivia('B')">B) Paris</button>
+                  <button onclick="answerTrivia('C')">C) Berlin</button>
+                  <button onclick="answerTrivia('D')">D) Madrid</button>
+                </div>
+              </div>
+              <button onclick="leaveGame()">Leave Game</button>
+            </div>
+          `;
+          break;
+          
+        case 'drawing':
+          gameHTML = `
+            <div class="game-container">
+              <h2>🎨 Drawing</h2>
+              <p>Player: ${username}</p>
+              <canvas id="drawing-canvas" width="400" height="300" style="border: 1px solid #ccc;"></canvas>
+              <div class="drawing-controls">
+                <button onclick="clearCanvas()">Clear</button>
+                <input type="color" id="color-picker" value="#000000">
+                <input type="range" id="brush-size" min="1" max="20" value="5">
+              </div>
+              <button onclick="leaveGame()">Leave Game</button>
+            </div>
+          `;
+          break;
+          
+        case 'card':
+          gameHTML = `
+            <div class="game-container">
+              <h2>🃏 Card Game</h2>
+              <p>Player: ${username}</p>
+              <div class="card-game">
+                <div class="hand" id="player-hand">
+                  <div class="card">A♠</div>
+                  <div class="card">K♥</div>
+                  <div class="card">Q♦</div>
+                </div>
+                <div class="game-actions">
+                  <button onclick="playCard()">Play Card</button>
+                  <button onclick="drawCard()">Draw Card</button>
+                </div>
+              </div>
+              <button onclick="leaveGame()">Leave Game</button>
+            </div>
+          `;
+          break;
+          
+        case 'dice':
+          gameHTML = `
+            <div class="game-container">
+              <h2>🎯 Dice Game</h2>
+              <p>Player: ${username}</p>
+              <div class="dice-game">
+                <div class="dice" id="dice-result">?</div>
+                <button onclick="rollDice()">Roll Dice</button>
+                <p>Score: <span id="dice-score">0</span></p>
+              </div>
+              <button onclick="leaveGame()">Leave Game</button>
+            </div>
+          `;
+          break;
+          
+        default:
+          gameHTML = `
+            <div class="game-container">
+              <h2>🎮 ${gameType}</h2>
+              <p>Game coming soon!</p>
+              <button onclick="leaveGame()">Back to Lobby</button>
+            </div>
+          `;
+      }
+      
+      document.body.innerHTML = gameHTML;
+      setupGameSpecificLogic(gameType, gameSocket);
+    }
+
+    function setupGameSpecificLogic(gameType, gameSocket) {
+      switch(gameType) {
+        case 'drawing':
+          setupDrawingCanvas(gameSocket);
+          break;
+        case 'dice':
+          setupDiceGame(gameSocket);
+          break;
+      }
+    }
+
+    function leaveGame() {
+      initGameHub();
+    }
+
+    // Game-specific functions
+    function makeMove(row, col) {
+      console.log(`Making move at ${row}, ${col}`);
+      // Tic-tac-toe logic would go here
+    }
+
+    function answerTrivia(answer) {
+      console.log(`Answered: ${answer}`);
+      // Trivia logic would go here
+    }
+
+    function setupDrawingCanvas(gameSocket) {
+      const canvas = document.getElementById('drawing-canvas');
+      const ctx = canvas.getContext('2d');
+      let isDrawing = false;
+      
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      
+      function startDrawing(e) {
+        isDrawing = true;
+        draw(e);
+      }
+      
+      function draw(e) {
+        if (!isDrawing) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        ctx.lineWidth = document.getElementById('brush-size').value;
+        ctx.strokeStyle = document.getElementById('color-picker').value;
+        ctx.lineCap = 'round';
+        
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      }
+      
+      function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+      }
+    }
+
+    function clearCanvas() {
+      const canvas = document.getElementById('drawing-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function setupDiceGame(gameSocket) {
+      window.rollDice = function() {
+        const result = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-result').textContent = result;
+        const currentScore = parseInt(document.getElementById('dice-score').textContent);
+        document.getElementById('dice-score').textContent = currentScore + result;
+      };
+    }
+
+    function playCard() {
+      console.log('Playing card');
+      // Card game logic would go here
+    }
+
+    function drawCard() {
+      console.log('Drawing card');
+      // Card game logic would go here
     }
 
     function logout() {
