@@ -51,14 +51,33 @@
       }
     };
 
-    const socket = io(getServerUrl());
+    const socket = io(getServerUrl(), {
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: true
+    });
 
     socket.on("connect", () => {
-      console.log("Connected to server");
+      console.log("✅ Connected to server:", socket.id);
+      // Update UI to show connection status
+      if (document.getElementById('connection-status')) {
+        document.getElementById('connection-status').textContent = '🟢 Connected';
+      }
     });
 
     socket.on("connect_error", (error) => {
-      console.error("Connection error:", error);
+      console.error("❌ Connection error:", error);
+      // Update UI to show connection error
+      if (document.getElementById('connection-status')) {
+        document.getElementById('connection-status').textContent = '🔴 Connection Failed';
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔌 Disconnected from server");
+      if (document.getElementById('connection-status')) {
+        document.getElementById('connection-status').textContent = '🟡 Disconnected';
+      }
     });
   </script>
   <script>
@@ -84,6 +103,7 @@
       document.body.innerHTML = `
         <div class="game-container">
           <h1>Welcome, ${username}!</h1>
+          <p>Server Status: <span id="connection-status">🟡 Connecting...</span></p>
           <p>Choose a game to play:</p>
           <div id="games-list">
             <div class="game-container">
